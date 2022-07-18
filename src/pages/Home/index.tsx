@@ -23,6 +23,7 @@ export interface ICycle {
   minutes: number
   startDate: number
   interruptedDate?: number
+  finishedDate?: number
 }
 
 export interface INewCycleFormData {
@@ -32,7 +33,7 @@ export interface INewCycleFormData {
 
 const newCycleValiadationSchema = zod.object({
   task: zod.string().min(1).max(255),
-  minutes: zod.number().min(5).max(60),
+  minutes: zod.number().min(1).max(60),
 })
 
 export function Home() {
@@ -50,14 +51,33 @@ export function Home() {
 
   const activeCycle = cycles.find(cycle => cycle.id === activeCycleId)
 
+  const totalSeconds = activeCycle ? activeCycle.minutes * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountPassedInSec : 0
+
   useEffect(() => {
     let interval: number
 
     if (activeCycle) {
       interval = setInterval(() => {
-        setAmountPassedInSec(
-          differenceInSeconds(Date.now(), activeCycle.startDate)
-        )
+        const diffInSec = differenceInSeconds(Date.now(), activeCycle.startDate)
+
+        if (diffInSec >= totalSeconds) {
+          setCycles(oldState =>
+            oldState.map(cycle => {
+              if (cycle.id === activeCycleId) {
+                return { ...cycle, finishedDate: Date.now() }
+              }
+
+              return cycle
+            })
+          )
+
+          setActiveCycleId(undefined)
+          setAmountPassedInSec(totalSeconds)
+          clearInterval(interval)
+        } else {
+          setAmountPassedInSec(diffInSec)
+        }
       }, 1000)
     }
 
@@ -65,9 +85,6 @@ export function Home() {
       clearInterval(interval)
     }
   }, [activeCycle])
-
-  const totalSeconds = activeCycle ? activeCycle.minutes * 60 : 0
-  const currentSeconds = activeCycle ? totalSeconds - amountPassedInSec : 0
 
   const minutesAmount = Math.floor(currentSeconds / 60)
   const secondsAmount = currentSeconds % 60
@@ -145,7 +162,7 @@ export function Home() {
           <MinutesAmountInput
             id="minutesAmount"
             step={5}
-            min={5}
+            min={1}
             max={60}
             placeholder="45"
             type="number"
