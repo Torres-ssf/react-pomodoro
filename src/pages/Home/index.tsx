@@ -22,6 +22,7 @@ export interface ICycle {
   task: string
   minutes: number
   startDate: number
+  interruptedDate?: number
 }
 
 export interface INewCycleFormData {
@@ -104,6 +105,20 @@ export function Home() {
 
   function handleInterruptCycle() {
     setActiveCycleId(undefined)
+
+    setCycles(oldState =>
+      oldState.map(cycle => {
+        if (cycle.id === activeCycleId) {
+          return {
+            ...cycle,
+            interruptedDate: Date.now(),
+          }
+        }
+
+        return cycle
+      })
+    )
+
     setAmountPassedInSec(0)
   }
 
