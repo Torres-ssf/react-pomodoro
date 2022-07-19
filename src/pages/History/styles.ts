@@ -62,7 +62,7 @@ export const HistoryList = styled.div`
   }
 `
 
-interface IStatusProps {
+export interface IStatusProps {
   statusColor: 'yellow' | 'green' | 'red'
 }
 
