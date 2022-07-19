@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useState } from 'react'
-import { INewCycleFormData } from '../pages/Home'
+import { INewCycleFormData } from '../pages/Home/components/CycleForm'
 
 export interface ICycle {
   id: string
@@ -11,6 +11,7 @@ export interface ICycle {
 }
 
 export interface ICycleContextProps {
+  cycles: ICycle[]
   activeCycle: ICycle | undefined
   activeCycleId: string | undefined
   amountPassedInSec: number
@@ -61,8 +62,6 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     setCycles(oldState => [...oldState, cycle])
     setActiveCycleId(cycle.id)
     setAmountPassedInSec(0)
-
-    // reset()
   }
 
   function interruptCurrentCycle() {
@@ -87,6 +86,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   return (
     <CycleContext.Provider
       value={{
+        cycles,
         activeCycle,
         activeCycleId,
         markCurrentCycleAsFinished,
