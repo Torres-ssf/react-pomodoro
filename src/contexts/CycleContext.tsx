@@ -1,5 +1,11 @@
-import { createContext, ReactNode, useState } from 'react'
+import { createContext, ReactNode, useReducer, useState } from 'react'
 import { INewCycleFormData } from '../pages/Home/components/CycleForm'
+import {
+  addNewCycleAction,
+  interruptCurrentCycleAction,
+  markCurrentCycleAsFinishedAction,
+} from '../reducers/cycle/actions'
+import { cycleReducer } from '../reducers/cycle/reducer'
 
 export interface ICycle {
   id: string
@@ -28,59 +34,38 @@ interface ICycleContextProviderProps {
 }
 
 export function CycleContextProvider({ children }: ICycleContextProviderProps) {
-  const [cycles, setCycles] = useState<ICycle[]>([])
-  const [activeCycleId, setActiveCycleId] = useState<string | undefined>()
+  const [state, dispatch] = useReducer(cycleReducer, {
+    cycles: [],
+    activeCycleId: undefined,
+  })
   const [amountPassedInSec, setAmountPassedInSec] = useState<number>(0)
 
-  const activeCycle = cycles.find(cycle => cycle.id === activeCycleId)
+  const { cycles, activeCycleId } = state
+  const activeCycle = state.cycles.find(
+    cycle => cycle.id === state.activeCycleId
+  )
 
   function setAmountPassed(amount: number) {
     setAmountPassedInSec(amount)
   }
 
   function markCurrentCycleAsFinished() {
-    setCycles(oldState =>
-      oldState.map(cycle => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, finishedDate: Date.now() }
-        }
-
-        return cycle
-      })
-    )
-    setActiveCycleId(undefined)
+    dispatch(markCurrentCycleAsFinishedAction())
   }
 
   function createNewCycle(data: INewCycleFormData) {
-    const cycle: ICycle = {
+    const newCycle: ICycle = {
       id: Date.now().toString(),
       task: data.task,
       minutes: data.minutes,
       startDate: Date.now(),
     }
 
-    setCycles(oldState => [...oldState, cycle])
-    setActiveCycleId(cycle.id)
-    setAmountPassedInSec(0)
+    dispatch(addNewCycleAction(newCycle))
   }
 
   function interruptCurrentCycle() {
-    setActiveCycleId(undefined)
-
-    setCycles(oldState =>
-      oldState.map(cycle => {
-        if (cycle.id === activeCycleId) {
-          return {
-            ...cycle,
-            interruptedDate: Date.now(),
-          }
-        }
-
-        return cycle
-      })
-    )
-
-    setAmountPassedInSec(0)
+    dispatch(interruptCurrentCycleAction())
   }
 
   return (
