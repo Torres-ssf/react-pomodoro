@@ -88,12 +88,12 @@ export function CycleForm() {
 
       {activeCycle ? (
         <StopCountdownButton type="button" onClick={handleInterruptCycle}>
-          <Stop size={24} />
+          <Stop size={24} weight="bold" />
           Stop
         </StopCountdownButton>
       ) : (
         <StartCountdownButton type="submit" disabled={isStartButtonDisabled}>
-          <Play size={24} />
+          <Play size={24} weight="bold" />
           Start
         </StartCountdownButton>
       )}
