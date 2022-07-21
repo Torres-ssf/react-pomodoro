@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useReducer, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react'
 import { INewCycleFormData } from '../pages/Home/components/CycleForm'
 import {
   addNewCycleAction,
@@ -34,13 +40,32 @@ interface ICycleContextProviderProps {
 }
 
 export function CycleContextProvider({ children }: ICycleContextProviderProps) {
-  const [state, dispatch] = useReducer(cycleReducer, {
-    cycles: [],
-    activeCycleId: undefined,
-  })
+  const [state, dispatch] = useReducer(
+    cycleReducer,
+    {
+      cycles: [],
+      activeCycleId: undefined,
+    },
+    () => {
+      const storedStateJson = localStorage.getItem(
+        '@react-pomodoro:cycle-state-1.0.0'
+      )
+
+      if (storedStateJson) {
+        return JSON.parse(storedStateJson)
+      }
+    }
+  )
   const [amountPassedInSec, setAmountPassedInSec] = useState<number>(0)
 
+  useEffect(() => {
+    const stateJson = JSON.stringify(state)
+
+    localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
+  }, [state])
+
   const { cycles, activeCycleId } = state
+
   const activeCycle = state.cycles.find(
     cycle => cycle.id === state.activeCycleId
   )
