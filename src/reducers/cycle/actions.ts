@@ -17,12 +17,12 @@ export function addNewCycleAction(newCycle: ICycle) {
 
 export function interruptCurrentCycleAction() {
   return {
-    type: CycleReducerActionTypeEnum.ADD_NEW_CYCLE,
+    type: CycleReducerActionTypeEnum.INTERRUPT_CURRENT_CYCLE,
   }
 }
 
 export function markCurrentCycleAsFinishedAction() {
   return {
-    type: CycleReducerActionTypeEnum.ADD_NEW_CYCLE,
+    type: CycleReducerActionTypeEnum.MARK_CURRENT_CYCLE_AS_FINISHED,
   }
 }
