@@ -6,7 +6,6 @@ import { CountdownContainer, Separator } from './styles'
 export function CycleCountdown() {
   const {
     activeCycle,
-    activeCycleId,
     markCurrentCycleAsFinished,
     amountPassedInSec,
     setAmountPassed,
@@ -30,7 +29,6 @@ export function CycleCountdown() {
 
         if (diffInSec >= totalSeconds) {
           markCurrentCycleAsFinished()
-          setAmountPassed(totalSeconds)
           clearInterval(interval)
         } else {
           setAmountPassed(diffInSec)
@@ -41,7 +39,7 @@ export function CycleCountdown() {
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle, activeCycleId, totalSeconds, markCurrentCycleAsFinished])
+  }, [activeCycle, totalSeconds, markCurrentCycleAsFinished])
 
   useEffect(() => {
     if (activeCycle) {
