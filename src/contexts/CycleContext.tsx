@@ -1,3 +1,4 @@
+import { differenceInSeconds } from 'date-fns'
 import {
   createContext,
   ReactNode,
@@ -11,7 +12,7 @@ import {
   interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
 } from '../reducers/cycle/actions'
-import { cycleReducer } from '../reducers/cycle/reducer'
+import { cycleReducer, ICycleState } from '../reducers/cycle/reducer'
 
 export interface ICycle {
   id: string
@@ -40,13 +41,13 @@ interface ICycleContextProviderProps {
 }
 
 export function CycleContextProvider({ children }: ICycleContextProviderProps) {
-  const [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer<typeof cycleReducer, ICycleState>(
     cycleReducer,
     {
       cycles: [],
       activeCycleId: undefined,
     },
-    () => {
+    (initialState: ICycleState) => {
       const storedStateJson = localStorage.getItem(
         '@react-pomodoro:cycle-state-1.0.0'
       )
@@ -54,15 +55,10 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
       if (storedStateJson) {
         return JSON.parse(storedStateJson)
       }
+
+      return initialState
     }
   )
-  const [amountPassedInSec, setAmountPassedInSec] = useState<number>(0)
-
-  useEffect(() => {
-    const stateJson = JSON.stringify(state)
-
-    localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
-  }, [state])
 
   const { cycles, activeCycleId } = state
 
@@ -70,12 +66,29 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     cycle => cycle.id === state.activeCycleId
   )
 
+  const [amountPassedInSec, setAmountPassedInSec] = useState<number>(() => {
+    if (activeCycle) {
+      const diffInSec = differenceInSeconds(Date.now(), activeCycle.startDate)
+
+      return diffInSec
+    }
+
+    return 0
+  })
+
+  useEffect(() => {
+    const stateJson = JSON.stringify(state)
+
+    localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
+  }, [state])
+
   function setAmountPassed(amount: number) {
     setAmountPassedInSec(amount)
   }
 
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction())
+    setAmountPassedInSec(0)
   }
 
   function createNewCycle(data: INewCycleFormData) {
@@ -91,6 +104,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
 
   function interruptCurrentCycle() {
     dispatch(interruptCurrentCycleAction())
+    setAmountPassedInSec(0)
   }
 
   return (
