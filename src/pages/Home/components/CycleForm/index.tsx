@@ -69,9 +69,9 @@ export function CycleForm() {
         <label htmlFor="minutesAmount">For</label>
         <MinutesAmountInput
           id="minutesAmount"
-          step={5}
           min={5}
           max={60}
+          step={5}
           type="number"
           disabled={!!activeCycle}
           {...register('minutes', { valueAsNumber: true })}
@@ -79,7 +79,7 @@ export function CycleForm() {
         <span>minutes.</span>
       </FormHeader>
 
-      <CycleCountdown />
+      <CycleCountdown formMinutesData={minutesValue} />
 
       {activeCycle ? (
         <StopCountdownButton type="button" onClick={handleInterruptCycle}>

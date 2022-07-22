@@ -1,53 +1,33 @@
-import { differenceInSeconds } from 'date-fns'
-import { useContext, useEffect } from 'react'
+import { differenceInHours, format } from 'date-fns'
+import { useContext } from 'react'
 import { CycleContext } from '../../../../contexts/CycleContext'
 import { CountdownContainer, Separator } from './styles'
 
-export function CycleCountdown() {
-  const {
-    activeCycle,
-    markCurrentCycleAsFinished,
-    amountPassedInSec,
-    setAmountPassed,
-  } = useContext(CycleContext)
+export interface ICycleCountdownProps {
+  formMinutesData: number
+}
 
-  const totalSeconds = activeCycle ? activeCycle.minutes * 60 : 0
-  const currentSeconds = activeCycle ? totalSeconds - amountPassedInSec : 0
+export function CycleCountdown(props: ICycleCountdownProps) {
+  const { formattedTime, activeCycle } = useContext(CycleContext)
 
-  const minutesAmount = Math.floor(currentSeconds / 60)
-  const secondsAmount = currentSeconds % 60
+  const { formMinutesData } = props
 
-  const minutes = String(minutesAmount).padStart(2, '0')
-  const seconds = String(secondsAmount).padStart(2, '0')
+  let minutes: string
+  let seconds: string
 
-  useEffect(() => {
-    let interval: number
+  if (activeCycle) {
+    ;({ minutes, seconds } = formattedTime)
+  } else {
+    const miliSeconds = formMinutesData * 60 * 1000
 
-    if (activeCycle) {
-      interval = setInterval(() => {
-        const diffInSec = differenceInSeconds(Date.now(), activeCycle.startDate)
+    const splitTimeRegex = /[0-9]{2,}/g
 
-        if (diffInSec >= totalSeconds) {
-          markCurrentCycleAsFinished()
-          clearInterval(interval)
-        } else {
-          setAmountPassed(diffInSec)
-        }
-      }, 1000)
-    }
+    const timeString = differenceInHours(0, miliSeconds)
+      ? '60:00'
+      : format(miliSeconds, 'mm:ss')
 
-    return () => {
-      clearInterval(interval)
-    }
-  }, [activeCycle, totalSeconds, markCurrentCycleAsFinished])
-
-  useEffect(() => {
-    if (activeCycle) {
-      document.title = `${minutes}:${seconds}`
-    } else {
-      document.title = 'Pomodoro'
-    }
-  }, [minutes, seconds, activeCycle])
+    ;[minutes, seconds] = timeString.match(splitTimeRegex)!
+  }
 
   return (
     <CountdownContainer>
