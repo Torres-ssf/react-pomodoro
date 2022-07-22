@@ -26,11 +26,8 @@ export interface ICycle {
 export interface ICycleContextProps {
   cycles: ICycle[]
   activeCycle: ICycle | undefined
-  activeCycleId: string | undefined
-  amountPassedInSec: number
-  setAmountPassed: (amount: number) => void
+  formattedTime: { minutes: string; seconds: string }
   createNewCycle: (data: INewCycleFormData) => void
-  markCurrentCycleAsFinished: () => void
   interruptCurrentCycle: () => void
 }
 
@@ -62,9 +59,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
 
   const { cycles, activeCycleId } = state
 
-  const activeCycle = state.cycles.find(
-    cycle => cycle.id === state.activeCycleId
-  )
+  const activeCycle = state.cycles.find(cycle => cycle.id === activeCycleId)
 
   const [amountPassedInSec, setAmountPassedInSec] = useState<number>(() => {
     if (activeCycle) {
@@ -76,15 +71,58 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     return 0
   })
 
+  const formattedTime = {
+    minutes: '00',
+    seconds: '00',
+  }
+
+  const totalSeconds = activeCycle ? activeCycle.minutes * 60 : 0
+
+  if (activeCycle) {
+    const totalSeconds = activeCycle ? activeCycle.minutes * 60 : 0
+    const currentSeconds = activeCycle ? totalSeconds - amountPassedInSec : 0
+
+    const minutesAmount = Math.floor(currentSeconds / 60)
+    const secondsAmount = currentSeconds % 60
+
+    formattedTime.minutes = String(minutesAmount).padStart(2, '0')
+    formattedTime.seconds = String(secondsAmount).padStart(2, '0')
+  }
+
   useEffect(() => {
     const stateJson = JSON.stringify(state)
 
     localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
   }, [state])
 
-  function setAmountPassed(amount: number) {
-    setAmountPassedInSec(amount)
-  }
+  useEffect(() => {
+    let interval: number
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        const diffInSec = differenceInSeconds(Date.now(), activeCycle.startDate)
+
+        if (diffInSec >= totalSeconds) {
+          markCurrentCycleAsFinished()
+          clearInterval(interval)
+        } else {
+          setAmountPassedInSec(diffInSec)
+        }
+      }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle, totalSeconds, markCurrentCycleAsFinished])
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${formattedTime.minutes}:${formattedTime.seconds}`
+    } else {
+      document.title = 'Pomodoro'
+    }
+  }, [formattedTime.minutes, formattedTime.seconds, activeCycle])
 
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction())
@@ -112,12 +150,9 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
       value={{
         cycles,
         activeCycle,
-        activeCycleId,
-        markCurrentCycleAsFinished,
         createNewCycle,
         interruptCurrentCycle,
-        amountPassedInSec,
-        setAmountPassed,
+        formattedTime,
       }}
     >
       {children}
