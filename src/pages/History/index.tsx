@@ -1,10 +1,18 @@
 import { formatDistanceToNow } from 'date-fns'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { CycleContext } from '../../contexts/CycleContext'
 import { HistoryContainer, HistoryList, Status } from './styles'
+import { useNavigate } from 'react-router-dom'
 
 export function History() {
-  const { cycles } = useContext(CycleContext)
+  const { cycles, isCycleFinished } = useContext(CycleContext)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isCycleFinished) {
+      navigate('/')
+    }
+  }, [isCycleFinished, navigate])
 
   return (
     <HistoryContainer>
