@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useContext } from 'react'
 import { CycleContext } from '../../../../contexts/CycleContext'
-import { Stop, Play } from 'phosphor-react'
+import { Stop, Play, Alarm } from 'phosphor-react'
 import { CycleCountdown } from '../CycleCountdown'
 
 export interface INewCycleFormData {
@@ -30,15 +30,14 @@ export function CycleForm() {
     activeCycle,
     interruptCurrentCycle,
     createNewCycle,
-    isCycleFinished,
     userIsAwareOfCycleFinished,
   } = useContext(CycleContext)
 
   const { register, handleSubmit, watch, reset } = useForm<INewCycleFormData>({
     resolver: zodResolver(newCycleValiadationSchema),
     defaultValues: {
-      task: '',
-      minutes: 15,
+      task: activeCycle ? activeCycle.task : '',
+      minutes: activeCycle ? activeCycle.minutes : 15,
     },
   })
 
@@ -48,6 +47,7 @@ export function CycleForm() {
   const isStartButtonDisabled = !taskValue.length || !minutesValue
 
   function handleUserIsAwareOfCycleFinished() {
+    reset()
     userIsAwareOfCycleFinished()
   }
 
@@ -57,7 +57,6 @@ export function CycleForm() {
 
   function handleCreateNewCycle(data: INewCycleFormData) {
     createNewCycle(data)
-    reset()
   }
 
   return (
@@ -73,7 +72,7 @@ export function CycleForm() {
           placeholder="give a name to your task"
           list="task-suggestions"
           autoComplete="off"
-          disabled={!!activeCycle && isCycleFinished}
+          disabled={!!activeCycle}
           {...register('task')}
         />
 
@@ -92,20 +91,21 @@ export function CycleForm() {
 
       <CycleCountdown formMinutesData={minutesValue} />
 
-      {!activeCycle && isCycleFinished && (
+      {activeCycle && activeCycle.finishedDate && (
         <OKButton type="button" onClick={handleUserIsAwareOfCycleFinished}>
+          <Alarm size={24} weight="bold" />
           OK
         </OKButton>
       )}
 
-      {!activeCycle && !isCycleFinished && (
+      {!activeCycle && (
         <StartCountdownButton type="submit" disabled={isStartButtonDisabled}>
           <Play size={24} weight="bold" />
           Start
         </StartCountdownButton>
       )}
 
-      {activeCycle && (
+      {activeCycle && !activeCycle.finishedDate && (
         <StopCountdownButton type="button" onClick={handleInterruptCycle}>
           <Stop size={24} weight="bold" />
           Stop

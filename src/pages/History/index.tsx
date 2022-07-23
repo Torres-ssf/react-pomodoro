@@ -1,18 +1,18 @@
-import { formatDistanceToNow } from 'date-fns'
+import { differenceInMinutes, format, formatDistanceToNow } from 'date-fns'
 import { useContext, useEffect } from 'react'
 import { CycleContext } from '../../contexts/CycleContext'
 import { HistoryContainer, HistoryList, Status } from './styles'
 import { useNavigate } from 'react-router-dom'
 
 export function History() {
-  const { cycles, isCycleFinished } = useContext(CycleContext)
+  const { cycles, activeCycle } = useContext(CycleContext)
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (isCycleFinished) {
+    if (activeCycle && activeCycle.finishedDate) {
       navigate('/')
     }
-  }, [isCycleFinished, navigate])
+  }, [activeCycle, navigate])
 
   return (
     <HistoryContainer>
@@ -34,7 +34,9 @@ export function History() {
                 <td>{cycle.task}</td>
                 <td>{cycle.minutes} minutes</td>
                 <td>
-                  {formatDistanceToNow(cycle.startDate, { addSuffix: true })}
+                  {differenceInMinutes(Date.now(), cycle.startDate) >= 45
+                    ? format(cycle.startDate, 'PPpp')
+                    : formatDistanceToNow(cycle.startDate, { addSuffix: true })}
                 </td>
                 <td>
                   {cycle.interruptedDate && (
