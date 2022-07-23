@@ -4,6 +4,7 @@ export enum CycleReducerActionTypeEnum {
   ADD_NEW_CYCLE = 'ADD_NEW_CYCLE',
   MARK_CURRENT_CYCLE_AS_FINISHED = 'MARK_CURRENT_CYCLE_AS_FINISHED',
   INTERRUPT_CURRENT_CYCLE = 'INTERRUPT_CURRENT_CYCLE',
+  SET_CYCLE_AS_NOT_FINISHED = 'SET_CYCLE_AS_NOT_FINISHED',
 }
 
 export function addNewCycleAction(newCycle: ICycle) {
@@ -24,5 +25,11 @@ export function interruptCurrentCycleAction() {
 export function markCurrentCycleAsFinishedAction() {
   return {
     type: CycleReducerActionTypeEnum.MARK_CURRENT_CYCLE_AS_FINISHED,
+  }
+}
+
+export function setCycleAsNotFinished() {
+  return {
+    type: CycleReducerActionTypeEnum.SET_CYCLE_AS_NOT_FINISHED,
   }
 }
