@@ -4,7 +4,6 @@ import { CycleReducerActionTypeEnum } from './actions'
 export interface ICycleState {
   cycles: ICycle[]
   activeCycleId: string | undefined
-  isCycleFinished: boolean
 }
 
 interface ICycleReducerAction {
@@ -19,13 +18,11 @@ export function cycleReducer(
   switch (action.type) {
     case CycleReducerActionTypeEnum.ADD_NEW_CYCLE:
       return {
-        ...state,
         cycles: [action.payload.newCycle, ...state.cycles],
         activeCycleId: action.payload.newCycle.id,
       }
     case CycleReducerActionTypeEnum.INTERRUPT_CURRENT_CYCLE:
       return {
-        ...state,
         cycles: state.cycles.map(cycle => {
           if (cycle.id === state.activeCycleId) {
             return {
@@ -39,6 +36,7 @@ export function cycleReducer(
       }
     case CycleReducerActionTypeEnum.MARK_CURRENT_CYCLE_AS_FINISHED:
       return {
+        ...state,
         cycles: state.cycles.map(cycle => {
           if (cycle.id === state.activeCycleId) {
             return {
@@ -48,13 +46,11 @@ export function cycleReducer(
           }
           return cycle
         }),
-        activeCycleId: undefined,
-        isCycleFinished: true,
       }
-    case CycleReducerActionTypeEnum.SET_CYCLE_AS_NOT_FINISHED:
+    case CycleReducerActionTypeEnum.USER_IS_AWARE_CYCLE_FINISHED:
       return {
         ...state,
-        isCycleFinished: false,
+        activeCycleId: undefined,
       }
     default:
       return state
