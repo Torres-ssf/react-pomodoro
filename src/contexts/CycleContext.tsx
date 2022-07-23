@@ -11,8 +11,11 @@ import {
   addNewCycleAction,
   interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
+  setCycleAsNotFinished,
 } from '../reducers/cycle/actions'
 import { cycleReducer, ICycleState } from '../reducers/cycle/reducer'
+
+import alarmSong from '../assets/alarm.mp3'
 
 export interface ICycle {
   id: string
@@ -27,6 +30,8 @@ export interface ICycleContextProps {
   cycles: ICycle[]
   activeCycle: ICycle | undefined
   formattedTime: { minutes: string; seconds: string }
+  isCycleFinished: boolean
+  userIsAwareOfCycleFinished: () => void
   createNewCycle: (data: INewCycleFormData) => void
   interruptCurrentCycle: () => void
 }
@@ -43,21 +48,26 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     {
       cycles: [],
       activeCycleId: undefined,
+      isCycleFinished: false,
     },
     (initialState: ICycleState) => {
-      const storedStateJson = localStorage.getItem(
+      const stateJson = localStorage.getItem(
         '@react-pomodoro:cycle-state-1.0.0'
       )
 
-      if (storedStateJson) {
-        return JSON.parse(storedStateJson)
+      if (stateJson) {
+        const storedState = {
+          ...(JSON.parse(stateJson) as Omit<ICycleState, 'isCycleFinished'>),
+          isCycleFinished: false,
+        }
+        return storedState
       }
 
       return initialState
     }
   )
 
-  const { cycles, activeCycleId } = state
+  const { cycles, activeCycleId, isCycleFinished } = state
 
   const activeCycle = state.cycles.find(cycle => cycle.id === activeCycleId)
 
@@ -69,6 +79,12 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     }
 
     return 0
+  })
+
+  const [alarmSound] = useState(() => {
+    const audio = new Audio(alarmSong)
+    audio.loop = true
+    return audio
   })
 
   const formattedTime = {
@@ -90,7 +106,12 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   }
 
   useEffect(() => {
-    const stateJson = JSON.stringify(state)
+    const storableState: Omit<ICycleState, 'isCycleFinished'> = {
+      cycles: state.cycles,
+      activeCycleId: state.activeCycleId,
+    }
+
+    const stateJson = JSON.stringify(storableState)
 
     localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
   }, [state])
@@ -124,6 +145,18 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     }
   }, [formattedTime.minutes, formattedTime.seconds, activeCycle])
 
+  useEffect(() => {
+    if (isCycleFinished) {
+      alarmSound.play()
+    } else {
+      alarmSound.pause()
+    }
+  }, [isCycleFinished])
+
+  function userIsAwareOfCycleFinished() {
+    dispatch(setCycleAsNotFinished())
+  }
+
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction())
     setAmountPassedInSec(0)
@@ -150,9 +183,11 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
       value={{
         cycles,
         activeCycle,
+        userIsAwareOfCycleFinished,
         createNewCycle,
         interruptCurrentCycle,
         formattedTime,
+        isCycleFinished,
       }}
     >
       {children}
