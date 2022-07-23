@@ -1,4 +1,3 @@
-import * as zod from 'zod'
 import {
   FormContainer,
   FormHeader,
@@ -8,9 +7,7 @@ import {
   StopCountdownButton,
   TaskInput,
 } from './styles'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { useContext } from 'react'
+import { FormEvent, useContext, useState } from 'react'
 import { CycleContext } from '../../../../contexts/CycleContext'
 import { Stop, Play, Alarm } from 'phosphor-react'
 import { CycleCountdown } from '../CycleCountdown'
@@ -20,11 +17,6 @@ export interface INewCycleFormData {
   minutes: number
 }
 
-const newCycleValiadationSchema = zod.object({
-  task: zod.string().min(1).max(255),
-  minutes: zod.number().min(1).max(60),
-})
-
 export function CycleForm() {
   const {
     activeCycle,
@@ -33,37 +25,39 @@ export function CycleForm() {
     userIsAwareOfCycleFinished,
   } = useContext(CycleContext)
 
-  const { register, handleSubmit, watch, reset } = useForm<INewCycleFormData>({
-    resolver: zodResolver(newCycleValiadationSchema),
-    defaultValues: {
-      task: activeCycle ? activeCycle.task : '',
-      minutes: activeCycle ? activeCycle.minutes : 15,
-    },
-  })
+  const [task, setTask] = useState(activeCycle?.task || '')
+  const [minutes, setMinutes] = useState(activeCycle?.minutes || 15)
 
-  const taskValue = watch('task')
-  const minutesValue = watch('minutes')
+  const isStartButtonDisabled = !task.length || !minutes
 
-  const isStartButtonDisabled = !taskValue.length || !minutesValue
+  function resetInputFields() {
+    setTask('')
+    setMinutes(15)
+  }
 
   function handleUserIsAwareOfCycleFinished() {
-    reset()
     userIsAwareOfCycleFinished()
+    resetInputFields()
   }
 
   function handleInterruptCycle() {
     interruptCurrentCycle()
+    resetInputFields()
   }
 
-  function handleCreateNewCycle(data: INewCycleFormData) {
+  function handleCreateNewCycle(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    const data: INewCycleFormData = {
+      task,
+      minutes,
+    }
+
     createNewCycle(data)
   }
 
   return (
-    <FormContainer
-      action="submit"
-      onSubmit={handleSubmit(handleCreateNewCycle)}
-    >
+    <FormContainer action="submit" onSubmit={handleCreateNewCycle}>
       <FormHeader>
         <label htmlFor="task">I&apos;m going to work on</label>
         <TaskInput
@@ -72,24 +66,26 @@ export function CycleForm() {
           placeholder="give a name to your task"
           list="task-suggestions"
           autoComplete="off"
+          value={task}
+          onChange={e => setTask(e.target.value)}
           disabled={!!activeCycle}
-          {...register('task')}
         />
 
         <label htmlFor="minutesAmount">For</label>
         <MinutesAmountInput
           id="minutesAmount"
-          min={1}
+          min={5}
           max={60}
           step={5}
           type="number"
+          onChange={e => setMinutes(Number(e.target.value))}
+          value={minutes}
           disabled={!!activeCycle}
-          {...register('minutes', { valueAsNumber: true })}
         />
         <span>minutes.</span>
       </FormHeader>
 
-      <CycleCountdown formMinutesData={minutesValue} />
+      <CycleCountdown formMinutesData={minutes} />
 
       {activeCycle && activeCycle.finishedDate && (
         <OKButton type="button" onClick={handleUserIsAwareOfCycleFinished}>
