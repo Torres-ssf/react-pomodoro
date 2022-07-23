@@ -20,7 +20,7 @@ export function cycleReducer(
     case CycleReducerActionTypeEnum.ADD_NEW_CYCLE:
       return {
         ...state,
-        cycles: [...state.cycles, action.payload.newCycle],
+        cycles: [action.payload.newCycle, ...state.cycles],
         activeCycleId: action.payload.newCycle.id,
       }
     case CycleReducerActionTypeEnum.INTERRUPT_CURRENT_CYCLE:
