@@ -11,7 +11,7 @@ import {
   addNewCycleAction,
   interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
-  setCycleAsNotFinished,
+  userIsAwareCycleFinishedAction,
 } from '../reducers/cycle/actions'
 import { cycleReducer, ICycleState } from '../reducers/cycle/reducer'
 
@@ -30,7 +30,6 @@ export interface ICycleContextProps {
   cycles: ICycle[]
   activeCycle: ICycle | undefined
   formattedTime: { minutes: string; seconds: string }
-  isCycleFinished: boolean
   userIsAwareOfCycleFinished: () => void
   createNewCycle: (data: INewCycleFormData) => void
   interruptCurrentCycle: () => void
@@ -48,7 +47,6 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     {
       cycles: [],
       activeCycleId: undefined,
-      isCycleFinished: false,
     },
     (initialState: ICycleState) => {
       const stateJson = localStorage.getItem(
@@ -56,23 +54,19 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
       )
 
       if (stateJson) {
-        const storedState = {
-          ...(JSON.parse(stateJson) as Omit<ICycleState, 'isCycleFinished'>),
-          isCycleFinished: false,
-        }
-        return storedState
+        return JSON.parse(stateJson)
       }
 
       return initialState
     }
   )
 
-  const { cycles, activeCycleId, isCycleFinished } = state
+  const { cycles, activeCycleId } = state
 
   const activeCycle = state.cycles.find(cycle => cycle.id === activeCycleId)
 
   const [amountPassedInSec, setAmountPassedInSec] = useState<number>(() => {
-    if (activeCycle) {
+    if (activeCycle && !activeCycle.finishedDate) {
       const diffInSec = differenceInSeconds(Date.now(), activeCycle.startDate)
 
       return diffInSec
@@ -106,12 +100,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   }
 
   useEffect(() => {
-    const storableState: Omit<ICycleState, 'isCycleFinished'> = {
-      cycles: state.cycles,
-      activeCycleId: state.activeCycleId,
-    }
-
-    const stateJson = JSON.stringify(storableState)
+    const stateJson = JSON.stringify(state)
 
     localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
   }, [state])
@@ -146,15 +135,15 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   }, [formattedTime.minutes, formattedTime.seconds, activeCycle])
 
   useEffect(() => {
-    if (isCycleFinished) {
+    if (activeCycle && activeCycle.finishedDate) {
       alarmSound.play()
     } else {
       alarmSound.pause()
     }
-  }, [isCycleFinished])
+  }, [activeCycle])
 
   function userIsAwareOfCycleFinished() {
-    dispatch(setCycleAsNotFinished())
+    dispatch(userIsAwareCycleFinishedAction())
   }
 
   function markCurrentCycleAsFinished() {
@@ -187,7 +176,6 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
         createNewCycle,
         interruptCurrentCycle,
         formattedTime,
-        isCycleFinished,
       }}
     >
       {children}
