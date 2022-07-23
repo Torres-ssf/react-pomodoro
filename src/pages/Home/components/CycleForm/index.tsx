@@ -3,6 +3,7 @@ import {
   FormContainer,
   FormHeader,
   MinutesAmountInput,
+  OKButton,
   StartCountdownButton,
   StopCountdownButton,
   TaskInput,
@@ -25,14 +26,19 @@ const newCycleValiadationSchema = zod.object({
 })
 
 export function CycleForm() {
-  const { activeCycle, interruptCurrentCycle, createNewCycle } =
-    useContext(CycleContext)
+  const {
+    activeCycle,
+    interruptCurrentCycle,
+    createNewCycle,
+    isCycleFinished,
+    userIsAwareOfCycleFinished,
+  } = useContext(CycleContext)
 
   const { register, handleSubmit, watch, reset } = useForm<INewCycleFormData>({
     resolver: zodResolver(newCycleValiadationSchema),
     defaultValues: {
       task: '',
-      minutes: 5,
+      minutes: 15,
     },
   })
 
@@ -40,6 +46,10 @@ export function CycleForm() {
   const minutesValue = watch('minutes')
 
   const isStartButtonDisabled = !taskValue.length || !minutesValue
+
+  function handleUserIsAwareOfCycleFinished() {
+    userIsAwareOfCycleFinished()
+  }
 
   function handleInterruptCycle() {
     interruptCurrentCycle()
@@ -62,14 +72,15 @@ export function CycleForm() {
           type="text"
           placeholder="give a name to your task"
           list="task-suggestions"
-          disabled={!!activeCycle}
+          autoComplete="off"
+          disabled={!!activeCycle && isCycleFinished}
           {...register('task')}
         />
 
         <label htmlFor="minutesAmount">For</label>
         <MinutesAmountInput
           id="minutesAmount"
-          min={5}
+          min={1}
           max={60}
           step={5}
           type="number"
@@ -81,16 +92,24 @@ export function CycleForm() {
 
       <CycleCountdown formMinutesData={minutesValue} />
 
-      {activeCycle ? (
-        <StopCountdownButton type="button" onClick={handleInterruptCycle}>
-          <Stop size={24} weight="bold" />
-          Stop
-        </StopCountdownButton>
-      ) : (
+      {!activeCycle && isCycleFinished && (
+        <OKButton type="button" onClick={handleUserIsAwareOfCycleFinished}>
+          OK
+        </OKButton>
+      )}
+
+      {!activeCycle && !isCycleFinished && (
         <StartCountdownButton type="submit" disabled={isStartButtonDisabled}>
           <Play size={24} weight="bold" />
           Start
         </StartCountdownButton>
+      )}
+
+      {activeCycle && (
+        <StopCountdownButton type="button" onClick={handleInterruptCycle}>
+          <Stop size={24} weight="bold" />
+          Stop
+        </StopCountdownButton>
       )}
     </FormContainer>
   )

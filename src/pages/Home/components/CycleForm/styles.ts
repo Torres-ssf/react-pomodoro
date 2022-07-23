@@ -83,6 +83,9 @@ export const StartCountdownButton = styled(CountdownButton)`
     cursor: not-allowed;
   }
 `
+
+export const OKButton = styled(StartCountdownButton)``
+
 export const StopCountdownButton = styled(CountdownButton)`
   background: ${({ theme }) => theme['red-500']};
 
