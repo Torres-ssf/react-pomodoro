@@ -4,7 +4,7 @@ export enum CycleReducerActionTypeEnum {
   ADD_NEW_CYCLE = 'ADD_NEW_CYCLE',
   MARK_CURRENT_CYCLE_AS_FINISHED = 'MARK_CURRENT_CYCLE_AS_FINISHED',
   INTERRUPT_CURRENT_CYCLE = 'INTERRUPT_CURRENT_CYCLE',
-  SET_CYCLE_AS_NOT_FINISHED = 'SET_CYCLE_AS_NOT_FINISHED',
+  USER_IS_AWARE_CYCLE_FINISHED = 'USER_IS_AWARE_CYCLE_FINISHED',
 }
 
 export function addNewCycleAction(newCycle: ICycle) {
@@ -28,8 +28,8 @@ export function markCurrentCycleAsFinishedAction() {
   }
 }
 
-export function setCycleAsNotFinished() {
+export function userIsAwareCycleFinishedAction() {
   return {
-    type: CycleReducerActionTypeEnum.SET_CYCLE_AS_NOT_FINISHED,
+    type: CycleReducerActionTypeEnum.USER_IS_AWARE_CYCLE_FINISHED,
   }
 }
