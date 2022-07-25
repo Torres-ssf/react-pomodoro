@@ -9,6 +9,7 @@ import {
 import { INewCycleFormData } from '../pages/Home/components/CycleForm'
 import {
   addNewCycleAction,
+  deleteCyclesHistoryAction,
   interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
   userIsAwareCycleFinishedAction,
@@ -33,6 +34,7 @@ export interface ICycleContextProps {
   userIsAwareOfCycleFinished: () => void
   createNewCycle: (data: INewCycleFormData) => void
   interruptCurrentCycle: () => void
+  deleteCyclesHistory: () => void
 }
 
 export const CycleContext = createContext<ICycleContextProps>({} as any)
@@ -108,7 +110,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   useEffect(() => {
     let interval: number
 
-    if (activeCycle) {
+    if (activeCycle && !activeCycle.finishedDate) {
       interval = setInterval(() => {
         const diffInSec = differenceInSeconds(Date.now(), activeCycle.startDate)
 
@@ -128,19 +130,15 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
 
   useEffect(() => {
     if (activeCycle) {
-      document.title = `${formattedTime.minutes}:${formattedTime.seconds}`
+      if (activeCycle.finishedDate) {
+        document.title = `Pomodoro finished!`
+      } else {
+        document.title = `${formattedTime.minutes}:${formattedTime.seconds}`
+      }
     } else {
       document.title = 'Pomodoro'
     }
   }, [formattedTime.minutes, formattedTime.seconds, activeCycle])
-
-  useEffect(() => {
-    if (activeCycle && activeCycle.finishedDate) {
-      alarmSound.play()
-    } else {
-      alarmSound.pause()
-    }
-  }, [activeCycle])
 
   function userIsAwareOfCycleFinished() {
     dispatch(userIsAwareCycleFinishedAction())
@@ -149,6 +147,13 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction())
     setAmountPassedInSec(0)
+
+    alarmSound.play()
+
+    const timeout = setTimeout(() => {
+      alarmSound.pause()
+      clearTimeout(timeout)
+    }, 1000 * 60)
   }
 
   function createNewCycle(data: INewCycleFormData) {
@@ -167,6 +172,10 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     setAmountPassedInSec(0)
   }
 
+  function deleteCyclesHistory() {
+    dispatch(deleteCyclesHistoryAction())
+  }
+
   return (
     <CycleContext.Provider
       value={{
@@ -175,6 +184,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
         userIsAwareOfCycleFinished,
         createNewCycle,
         interruptCurrentCycle,
+        deleteCyclesHistory,
         formattedTime,
       }}
     >
