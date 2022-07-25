@@ -21,6 +21,7 @@ export function cycleReducer(
         cycles: [action.payload.newCycle, ...state.cycles],
         activeCycleId: action.payload.newCycle.id,
       }
+
     case CycleReducerActionTypeEnum.INTERRUPT_CURRENT_CYCLE:
       return {
         cycles: state.cycles.map(cycle => {
@@ -34,6 +35,7 @@ export function cycleReducer(
         }),
         activeCycleId: undefined,
       }
+
     case CycleReducerActionTypeEnum.MARK_CURRENT_CYCLE_AS_FINISHED:
       return {
         ...state,
@@ -47,11 +49,21 @@ export function cycleReducer(
           return cycle
         }),
       }
+
     case CycleReducerActionTypeEnum.USER_IS_AWARE_CYCLE_FINISHED:
       return {
         ...state,
         activeCycleId: undefined,
       }
+
+    case CycleReducerActionTypeEnum.DELETE_CYCLES_HISTORY:
+      return {
+        ...state,
+        cycles: state.cycles.filter(cycle => {
+          return cycle.id === state.activeCycleId
+        }),
+      }
+
     default:
       return state
   }
