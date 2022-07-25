@@ -8,10 +8,45 @@ export const HistoryContainer = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+`
+
+export const HistoryContainerHeader = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
   h1 {
     font-size: 1.5rem;
     color: ${({ theme }) => theme['gray-100']};
+  }
+`
+
+export const DeleteCyclesHistoryButton = styled.button`
+  border: none;
+  padding: 1.2rem;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  font-weight: bold;
+
+  color: ${({ theme }) => theme['gray-100']};
+  transition: background 0.2s ease-in-out;
+
+  cursor: pointer;
+
+  background: ${({ theme }) => theme['red-500']};
+
+  &:enabled:hover {
+    background: ${({ theme }) => theme['red-700']};
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 `
 

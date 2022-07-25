@@ -1,11 +1,18 @@
 import { differenceInMinutes, format, formatDistanceToNow } from 'date-fns'
 import { useContext, useEffect } from 'react'
 import { CycleContext } from '../../contexts/CycleContext'
-import { HistoryContainer, HistoryList, Status } from './styles'
+import {
+  DeleteCyclesHistoryButton,
+  HistoryContainer,
+  HistoryContainerHeader,
+  HistoryList,
+  Status,
+} from './styles'
 import { useNavigate } from 'react-router-dom'
+import { Trash } from 'phosphor-react'
 
 export function History() {
-  const { cycles, activeCycle } = useContext(CycleContext)
+  const { cycles, activeCycle, deleteCyclesHistory } = useContext(CycleContext)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -14,9 +21,27 @@ export function History() {
     }
   }, [activeCycle, navigate])
 
+  function handleDeleteCyclesHistory() {
+    deleteCyclesHistory()
+  }
+
+  const inactiveCycles = cycles.filter(c => c.id !== activeCycle?.id)
+
+  const isDeleteButtonDisabled = !inactiveCycles.length
+
   return (
     <HistoryContainer>
-      <h1>My History</h1>
+      <HistoryContainerHeader>
+        <h1>My History</h1>
+        <DeleteCyclesHistoryButton
+          type="button"
+          onClick={handleDeleteCyclesHistory}
+          disabled={isDeleteButtonDisabled}
+        >
+          <Trash size={24} weight="bold" />
+          Delete history
+        </DeleteCyclesHistoryButton>
+      </HistoryContainerHeader>
 
       <HistoryList>
         <table>
