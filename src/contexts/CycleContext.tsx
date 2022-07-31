@@ -54,7 +54,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     },
     (initialState: ICycleState) => {
       const stateJson = localStorage.getItem(
-        '@react-pomodoro:cycle-state-1.0.0'
+        import.meta.env.REACT_APP_CYCLES_STORAGE_KEY
       )
 
       if (stateJson) {
@@ -108,7 +108,10 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   useEffect(() => {
     const stateJson = JSON.stringify(state)
 
-    localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
+    localStorage.setItem(
+      import.meta.env.REACT_APP_CYCLES_STORAGE_KEY,
+      stateJson
+    )
   }, [state])
 
   useEffect(() => {
