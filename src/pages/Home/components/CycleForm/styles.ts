@@ -93,3 +93,13 @@ export const StopCountdownButton = styled(CountdownButton)`
     background: ${({ theme }) => theme['red-700']};
   }
 `
+
+export interface ICycleCompletedMessageProps {
+  isCompleted: boolean
+}
+
+export const CycleCompletedMessage = styled.strong<ICycleCompletedMessageProps>`
+  color: ${({ theme }) => theme['yellow-500']};
+  visibility: ${({ isCompleted }) => (isCompleted ? 'visible' : 'hidden')};
+  margin-top: -3rem;
+`
