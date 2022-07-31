@@ -2,6 +2,7 @@ import { differenceInMinutes, format, formatDistanceToNow } from 'date-fns'
 import { useContext, useEffect } from 'react'
 import { CycleContext } from '../../contexts/CycleContext'
 import {
+  DeleteCycleButton,
   DeleteCyclesHistoryButton,
   HistoryContainer,
   HistoryContainerHeader,
@@ -10,9 +11,11 @@ import {
 } from './styles'
 import { useNavigate } from 'react-router-dom'
 import { Trash } from 'phosphor-react'
+import { defaultTheme } from '../../styles/themes/default'
 
 export function History() {
-  const { cycles, activeCycle, deleteCyclesHistory } = useContext(CycleContext)
+  const { cycles, activeCycle, deleteCyclesHistory, deleteCycle } =
+    useContext(CycleContext)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -23,6 +26,10 @@ export function History() {
 
   function handleDeleteCyclesHistory() {
     deleteCyclesHistory()
+  }
+
+  function handleDeleteCycle(cycleId: string) {
+    deleteCycle(cycleId)
   }
 
   const inactiveCycles = cycles.filter(c => c.id !== activeCycle?.id)
@@ -39,7 +46,7 @@ export function History() {
           disabled={isDeleteButtonDisabled}
         >
           <Trash size={24} weight="bold" />
-          Delete history
+          Remove all entries
         </DeleteCyclesHistoryButton>
       </HistoryContainerHeader>
 
@@ -51,6 +58,7 @@ export function History() {
               <th>Duration</th>
               <th>Start</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -73,6 +81,20 @@ export function History() {
                   {!cycle.finishedDate && !cycle.interruptedDate && (
                     <Status statusColor="yellow">On going</Status>
                   )}
+                </td>
+                <td>
+                  <DeleteCycleButton
+                    role="button"
+                    type="button"
+                    disabled={activeCycle?.id === cycle.id}
+                    onClick={() => handleDeleteCycle(cycle.id)}
+                  >
+                    <Trash
+                      size={20}
+                      weight="bold"
+                      color={defaultTheme['red-500']}
+                    />
+                  </DeleteCycleButton>
                 </td>
               </tr>
             ))}
