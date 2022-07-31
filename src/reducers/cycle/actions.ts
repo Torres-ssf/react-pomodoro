@@ -6,6 +6,7 @@ export enum CycleReducerActionTypeEnum {
   INTERRUPT_CURRENT_CYCLE = 'INTERRUPT_CURRENT_CYCLE',
   USER_IS_AWARE_CYCLE_FINISHED = 'USER_IS_AWARE_CYCLE_FINISHED',
   DELETE_CYCLES_HISTORY = 'DELETE_CYCLES_HISTORY',
+  DELETE_CYCLE = 'DELETE_CYCLE',
 }
 
 export function addNewCycleAction(newCycle: ICycle) {
@@ -38,5 +39,14 @@ export function userIsAwareCycleFinishedAction() {
 export function deleteCyclesHistoryAction() {
   return {
     type: CycleReducerActionTypeEnum.DELETE_CYCLES_HISTORY,
+  }
+}
+
+export function deleteCycleAction(cycleId: string) {
+  return {
+    type: CycleReducerActionTypeEnum.DELETE_CYCLE,
+    payload: {
+      cycleId,
+    },
   }
 }

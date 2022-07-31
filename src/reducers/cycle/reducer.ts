@@ -56,6 +56,14 @@ export function cycleReducer(
         activeCycleId: undefined,
       }
 
+    case CycleReducerActionTypeEnum.DELETE_CYCLE:
+      return {
+        ...state,
+        cycles: state.cycles.filter(cycle => {
+          return cycle.id !== action.payload.cycleId
+        }),
+      }
+
     case CycleReducerActionTypeEnum.DELETE_CYCLES_HISTORY:
       return {
         ...state,
