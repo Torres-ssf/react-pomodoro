@@ -1,5 +1,4 @@
 import {
-  CycleCompletedMessage,
   FormContainer,
   FormHeader,
   MinutesAmountInput,
@@ -30,8 +29,6 @@ export function CycleForm() {
   const [minutes, setMinutes] = useState(activeCycle?.minutes || 15)
 
   const isStartButtonDisabled = !task.length || !minutes
-
-  const isCycleCompleted = !!activeCycle?.finishedDate
 
   function resetInputFields() {
     setTask('')
@@ -110,9 +107,6 @@ export function CycleForm() {
           Stop
         </StopCountdownButton>
       )}
-      <CycleCompletedMessage isCompleted={isCycleCompleted}>
-        Cycle has ended
-      </CycleCompletedMessage>
     </FormContainer>
   )
 }

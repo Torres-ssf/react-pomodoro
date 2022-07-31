@@ -96,18 +96,6 @@ export const HistoryList = styled.div`
       }
     }
   }
-
-  @media (max-width: 980px) {
-    table {
-      td {
-        padding: 0.5rem;
-
-        &:first-child {
-          width: 45%;
-        }
-      }
-    }
-  }
 `
 
 export interface IStatusProps {
@@ -135,29 +123,5 @@ export const Status = styled.span<IStatusProps>`
     border-radius: 9999px;
     background-color: ${({ theme, statusColor }) =>
       theme[STATUS_COLOR_MAP[statusColor]]};
-  }
-`
-
-export const DeleteCycleButton = styled.button`
-  width: 1.5rem;
-  height: 1.5rem;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: none;
-  background: transparent;
-
-  cursor: pointer;
-  transition: opacity 0.2s ease-in-out;
-
-  &:enabled:hover {
-    opacity: 0.7;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
   }
 `

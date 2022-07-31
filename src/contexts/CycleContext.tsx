@@ -9,7 +9,6 @@ import {
 import { INewCycleFormData } from '../pages/Home/components/CycleForm'
 import {
   addNewCycleAction,
-  deleteCycleAction,
   deleteCyclesHistoryAction,
   interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
@@ -34,7 +33,6 @@ export interface ICycleContextProps {
   formattedTime: { minutes: string; seconds: string }
   userIsAwareOfCycleFinished: () => void
   createNewCycle: (data: INewCycleFormData) => void
-  deleteCycle: (cycleId: string) => void
   interruptCurrentCycle: () => void
   deleteCyclesHistory: () => void
 }
@@ -54,7 +52,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     },
     (initialState: ICycleState) => {
       const stateJson = localStorage.getItem(
-        import.meta.env.REACT_APP_CYCLES_STORAGE_KEY
+        '@react-pomodoro:cycle-state-1.0.0'
       )
 
       if (stateJson) {
@@ -85,8 +83,6 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     return audio
   })
 
-  const [alarmTimeout, setAlarmTimeout] = useState(0)
-
   const formattedTime = {
     minutes: '00',
     seconds: '00',
@@ -108,10 +104,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   useEffect(() => {
     const stateJson = JSON.stringify(state)
 
-    localStorage.setItem(
-      import.meta.env.REACT_APP_CYCLES_STORAGE_KEY,
-      stateJson
-    )
+    localStorage.setItem('@react-pomodoro:cycle-state-1.0.0', stateJson)
   }, [state])
 
   useEffect(() => {
@@ -147,35 +140,25 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     }
   }, [formattedTime.minutes, formattedTime.seconds, activeCycle])
 
-  function playAlarm() {
-    alarmSound.play()
-
-    const timeout = setTimeout(() => {
-      stopAlarm()
-    }, 1000 * 60)
-
-    setAlarmTimeout(timeout)
-  }
-
-  function stopAlarm() {
-    alarmSound.pause()
-    clearTimeout(alarmTimeout)
-  }
-
   function userIsAwareOfCycleFinished() {
     dispatch(userIsAwareCycleFinishedAction())
-    stopAlarm()
   }
 
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction())
     setAmountPassedInSec(0)
-    playAlarm()
+
+    alarmSound.play()
+
+    const timeout = setTimeout(() => {
+      alarmSound.pause()
+      clearTimeout(timeout)
+    }, 1000 * 60)
   }
 
   function createNewCycle(data: INewCycleFormData) {
     const newCycle: ICycle = {
-      id: String(Date.now()),
+      id: Date.now().toString(),
       task: data.task,
       minutes: data.minutes,
       startDate: Date.now(),
@@ -187,10 +170,6 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   function interruptCurrentCycle() {
     dispatch(interruptCurrentCycleAction())
     setAmountPassedInSec(0)
-  }
-
-  function deleteCycle(cycleId: string) {
-    dispatch(deleteCycleAction(cycleId))
   }
 
   function deleteCyclesHistory() {
@@ -205,7 +184,6 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
         userIsAwareOfCycleFinished,
         createNewCycle,
         interruptCurrentCycle,
-        deleteCycle,
         deleteCyclesHistory,
         formattedTime,
       }}
