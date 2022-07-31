@@ -54,7 +54,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     },
     (initialState: ICycleState) => {
       const stateJson = localStorage.getItem(
-        import.meta.env.REACT_APP_CYCLES_STORAGE_KEY
+        import.meta.env.VITE_CYCLES_STORAGE_KEY
       )
 
       if (stateJson) {
@@ -108,10 +108,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
   useEffect(() => {
     const stateJson = JSON.stringify(state)
 
-    localStorage.setItem(
-      import.meta.env.REACT_APP_CYCLES_STORAGE_KEY,
-      stateJson
-    )
+    localStorage.setItem(import.meta.env.VITE_CYCLES_STORAGE_KEY, stateJson)
   }, [state])
 
   useEffect(() => {
