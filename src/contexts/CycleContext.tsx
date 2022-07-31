@@ -83,6 +83,8 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     return audio
   })
 
+  const [alarmTimeout, setAlarmTimeout] = useState(0)
+
   const formattedTime = {
     minutes: '00',
     seconds: '00',
@@ -140,25 +142,35 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     }
   }, [formattedTime.minutes, formattedTime.seconds, activeCycle])
 
+  function playAlarm() {
+    alarmSound.play()
+
+    const timeout = setTimeout(() => {
+      stopAlarm()
+    }, 1000 * 60)
+
+    setAlarmTimeout(timeout)
+  }
+
+  function stopAlarm() {
+    alarmSound.pause()
+    clearTimeout(alarmTimeout)
+  }
+
   function userIsAwareOfCycleFinished() {
     dispatch(userIsAwareCycleFinishedAction())
+    stopAlarm()
   }
 
   function markCurrentCycleAsFinished() {
     dispatch(markCurrentCycleAsFinishedAction())
     setAmountPassedInSec(0)
-
-    alarmSound.play()
-
-    const timeout = setTimeout(() => {
-      alarmSound.pause()
-      clearTimeout(timeout)
-    }, 1000 * 60)
+    playAlarm()
   }
 
   function createNewCycle(data: INewCycleFormData) {
     const newCycle: ICycle = {
-      id: Date.now().toString(),
+      id: String(Date.now()),
       task: data.task,
       minutes: data.minutes,
       startDate: Date.now(),
