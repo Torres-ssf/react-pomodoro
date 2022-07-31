@@ -77,7 +77,7 @@ export function CycleForm() {
         <label htmlFor="minutesAmount">For</label>
         <MinutesAmountInput
           id="minutesAmount"
-          min={1}
+          min={5}
           max={60}
           step={5}
           type="number"
