@@ -9,6 +9,7 @@ import {
 import { INewCycleFormData } from '../pages/Home/components/CycleForm'
 import {
   addNewCycleAction,
+  deleteCycleAction,
   deleteCyclesHistoryAction,
   interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
@@ -33,6 +34,7 @@ export interface ICycleContextProps {
   formattedTime: { minutes: string; seconds: string }
   userIsAwareOfCycleFinished: () => void
   createNewCycle: (data: INewCycleFormData) => void
+  deleteCycle: (cycleId: string) => void
   interruptCurrentCycle: () => void
   deleteCyclesHistory: () => void
 }
@@ -184,6 +186,10 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
     setAmountPassedInSec(0)
   }
 
+  function deleteCycle(cycleId: string) {
+    dispatch(deleteCycleAction(cycleId))
+  }
+
   function deleteCyclesHistory() {
     dispatch(deleteCyclesHistoryAction())
   }
@@ -196,6 +202,7 @@ export function CycleContextProvider({ children }: ICycleContextProviderProps) {
         userIsAwareOfCycleFinished,
         createNewCycle,
         interruptCurrentCycle,
+        deleteCycle,
         deleteCyclesHistory,
         formattedTime,
       }}
